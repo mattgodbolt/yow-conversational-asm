@@ -1,0 +1,870 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>Conversational ASM</title>
+
+    <link rel="stylesheet" href="reveal.js/dist/reset.css">
+    <link rel="stylesheet" href="reveal.js/dist/reveal.css">
+    <link rel="stylesheet" href="reveal.js/dist/theme/sky.css" id="theme">
+
+    <link rel="stylesheet" href="reveal.js/plugin/highlight/zenburn.css" id="highlight-theme">
+
+    <style>
+        .reveal .hljs {
+            font-size: 135% !important;
+        }
+
+        div.footer.copy {
+            z-index: 10;
+            font-size: 70%;
+            font-style: italic;
+            position: absolute;
+            bottom: 1em;
+            text-align: center;
+            background: #ddd;
+            box-shadow: 4px 4px #888;
+            border-radius: 4px;
+            padding: 8px !important;
+            margin-left: 15px;
+        }
+
+        div.footer.sdd {
+            z-index: 10;
+            font-size: 70%;
+            font-style: italic;
+            position: absolute;
+            right: 1em;
+            bottom: 1em;
+            text-align: center;
+            margin-right: 15px;
+            height: 8em;
+        }
+
+        section.stack {
+            background: #ddd;
+            box-shadow: 4px 4px #888;
+            border-radius: 4px;
+        }
+
+        .reveal .slide-number {
+            font-size: 1em;
+        }
+
+        .register {
+            font-weight: bold;
+        }
+
+        .registers th {
+            font-size: 30px;
+            text-align: center !important;
+        }
+
+        .registers td {
+            text-align: center !important;
+        }
+
+        .registers td {
+            border: 1px solid black !important;
+        }
+
+        .registers td.ymm1 {
+            background: rgb(141, 211, 159);
+        }
+
+        .registers td.op {
+            background: rgb(211, 196, 141);
+        }
+
+        .registers td.mem {
+            background: rgb(141, 142, 211);
+        }
+
+        .registers td.rax {
+            background: rgb(141, 211, 199);
+        }
+
+        .registers td.eax {
+            background: rgb(255, 255, 179);
+        }
+
+        .registers td.ax {
+            background: rgb(190, 186, 218);
+        }
+
+        .registers td.ah {
+            background: rgb(251, 128, 114);
+        }
+
+        .registers td.al {
+            background: rgb(128, 177, 211);
+        }
+
+        .registers td.regnote {
+            font-size: smaller;
+            font-style: italic;
+        }
+
+
+        ul.instr {
+            display: block !important;
+        }
+
+        div.w30 {
+            width: 29%;
+            display: inline-block;
+        }
+
+        div.w40 {
+            width: 39%;
+            display: inline-block;
+        }
+
+        div.w45 {
+            width: 44%;
+            display: inline-block;
+        }
+
+        div.w50 {
+            width: 49%;
+            display: inline-block;
+        }
+
+        div.w55 {
+            width: 54%;
+            display: inline-block;
+        }
+
+        div.w60 {
+            width: 59%;
+            display: inline-block;
+        }
+
+        .backstory {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .backstory img {
+            width: 150px;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+        div.attribution {
+            font-style: italic;
+            font-size: smaller;
+        }
+
+        div.pop {
+            width: 80%;
+            background: #ece6ce;
+            margin-top: 1em;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 4px 4px #888;
+            border-radius: 2px;
+            padding: 8px !important;
+        }
+
+    </style>
+</head>
+<body>
+<div class="reveal">
+    <div class="slides">
+        <section data-background-image="images/todo-bg.png">
+            <section>
+                <h2>Conversational ASM</h2>
+                <h3>Matt Godbolt <a href="https://twitter.com/mattgodbolt"><br>@mattgodbolt</a></h3>
+                <h5>YOW Tool Time<br>20th October 2020</h5>
+                <!--<div>To navigate, use the space bar, or the arrow keys (both left/right and up/down).<br>
+                    To open Compiler Explorer on any of the examples, control-click on the source-code.
+                </div>-->
+            </section>
+            <section>
+                <h2>Hello!</h2>
+            </section>
+            <section>
+                <h2>Confessions</h2>
+                <aside class="notes">
+                    I've been a bad programmer, I've revelled in the complexity and inpenetrability of my code. but in
+                    today's world it's not always required. cpus and compilers have come along a long way since the 80s
+                    and 90s but sometimes there's still bad advice given based off experiences in that era. I hope to
+                    rectify that in this talk.
+                </aside>
+            </section>
+            <section>
+                <img src="images/matt-is-cool.png" alt="Matt is cool" class="stretch">
+            </section>
+            <section>
+                <pre><code data-trim>
+                10 PRINT "What is your name? ";
+                20 INPUT A$
+                30 PRINT "Hello "; A$
+                40 GOTO 10</code></pre>
+            </section>
+            <section>
+                <h3>Journey</h3>
+                <div class="backstory">
+                    <img src="images/Beeb.png" alt="A bbc micro">
+                    <img src="images/Argonaut_software.png" alt="Argonaut Games PLC">
+                    <img src="images/profactor.png" alt="ProFactor">
+                    <img src="images/google.png" alt="Google">
+                    <img src="images/finance.png" alt="Finance">
+                </div>
+                <div class="fragment pop">TL;DR : low-level hacking</div>
+                <aside class="notes">
+                    * Grew up hacking on 8-bit computers
+                    * Worked at Argonaut Games 1996 til its demise
+                    * Hacked on PC, PS, Dreamcast, Xbox, PSP, PS2, Xbox 360
+                    * Left for "real world" to make C++ tools
+                    * Failed, but learned a lot
+                    * Google, YouTube, now finance
+                    * Common theme: low-level, high performance C++
+                </aside>
+            </section>
+            <section>
+                <img src="images/CE.svg" alt="Compiler Explorer" class="stretch">
+            </section>
+            <section>
+                <img src="images/ce-1.png" alt="Compiler Explorer" class="stretch">
+                <aside class="notes">
+                    https://godbolt.org/z/bfdd88
+                </aside>
+            </section>
+            <section>
+                <img src="images/ce-2.png" alt="Compiler Explorer" class="stretch">
+                <aside class="notes">
+                    https://godbolt.org/z/bfdd88
+                </aside>
+            </section>
+        </section>
+
+        <!------------------------------------------------------>
+        <section data-background-image="images/todo-bg.png" id="backstory">
+            <section>
+                <h3>Backstory</h3>
+                <div>
+                    <pre><code data-trim class="cpp" data-line-numbers="|3-4">
+                int sum(const vector&lt;int> &v) {
+                  int result = 0;
+                  for (size_t i = 0; i < v.size(); ++i)
+                    result += v[i];
+                  return result;
+                }</code></pre>
+                </div>
+                <div>
+                <pre class="fragment"><code data-trim class="cpp" data-line-numbers="|3-4">
+                int sum(const vector&lt;int> &v) {
+                  int result = 0;
+                  for (int x : v)
+                    result += x;
+                  return result;
+                }</code></pre>
+                </div>
+                <div class="fragment">Is one better than the other?</div>
+            </section>
+            <section>
+                <h3>WARNING</h3>
+                <!-- latency vs throughput ? -->
+                <ul>
+                    <li>Reading assembly alone can be misleading</li>
+                    <li><em>Always</em> measure too</li>
+                    <li>Google Benchmark</li>
+                    <li><a href="http://www.quick-bench.com/">quick-bench.com</a></li>
+                </ul>
+                <aside class="notes">
+                    Shout out to google benchmarking tool. Microbenchmarks, perils.
+
+                    But always measure end-to-end perf if you can too.
+                </aside>
+            </section>
+        </section>
+
+        <!------------------------------------------------------->
+        <section data-background-image="images/todo-bg.png" id="asm101">
+            <section>
+                <h3>64-bit x86 Intro</h3>
+                <div class="fragment">
+                    <img src="images/One_Ring_inscription.svg" alt="Ash nash krimpatur...">
+                    <div class="attribution">
+                        <a href="https://commons.wikimedia.org/wiki/User:Ssolbergj">Ssolbergj</a>, Wikimedia Commons CC
+                        SA 4.0
+                    </div>
+                </div>
+            </section>
+            <section>
+                <h3>Instructions</h3>
+                <pre><code data-trim data-noescape class="x86asm">
+<span class="hljs-keyword">instr</span>
+<span class="hljs-keyword">instr</span> <span class="hljs-built_in">dest_operand</span>
+<span class="hljs-keyword">instr</span> <span class="hljs-built_in">dest_operand</span>, <span class="hljs-built_in">source_operand</span>
+<span class="hljs-keyword">instr</span> <span class="hljs-built_in">dest_operand</span>, <span class="hljs-built_in">source_operand</span>, <span
+        class="hljs-built_in">source_operand</span>
+                </code></pre>
+                <pre><code data-trim class="x86asm">
+ret                           ; return
+inc rax                       ; increment "rax"
+mov edx, 1234                 ; set "edx" to the value 1234
+add rsi, rdi                  ; "rsi" += "rdi"
+vpaddd ymm1, ymm2, ymm0       ; "ymm1" = "ymm2" + "ymm0"
+                </code></pre>
+            </section>
+            <section>
+                <h3>Top 20 Instructions</h3>
+
+                <div class="w30 white-bg">
+                    <ul class="instr fragment highlight-current-red">
+                        <li><code class="instruction">mov</code></li>
+                        <li><code class="instruction">movzx</code></li>
+                        <li><code class="instruction">movsxd</code></li>
+                        <li><code class="instruction">lea</code></li>
+                    </ul>
+                    <ul class="instr fragment highlight-current-red">
+                        <li><code class="instruction">call</code></li>
+                        <li><code class="instruction">ret</code></li>
+                        <li><code class="instruction">jmp</code></li>
+                    </ul>
+                </div>
+
+                <div class="w30 white-bg">
+                    <ul class="instr fragment highlight-current-red">
+                        <li><code class="instruction">push</code></li>
+                        <li><code class="instruction">pop</code></li>
+                    </ul>
+                    <ul class="instr fragment highlight-current-red">
+                        <li><code class="instruction">cmp</code></li>
+                        <li><code class="instruction">test</code></li>
+                        <li><code class="instruction">je</code></li>
+                        <li><code class="instruction">jne</code></li>
+                    </ul>
+                </div>
+
+                <div class="w30 white-bg">
+                    <ul class="instr fragment highlight-current-red">
+                        <li><code class="instruction">and</code></li>
+                        <li><code class="instruction">xor</code></li>
+                        <li><code class="instruction">add</code></li>
+                        <li><code class="instruction">sub</code></li>
+                        <li><code class="instruction">shl</code></li>
+                        <li><code class="instruction">shr</code></li>
+                        <li><code class="instruction">sar</code></li>
+                    </ul>
+                </div>
+                <div class="fragment pop">jmp/je/jne == GOTO</div>
+            </section>
+            <section>
+                <h3>Registers</h3>
+                <ul>
+                    <li><code class="register">rax</code>, <code class="register">rbx</code>, <code
+                            class="register">rcx</code>, <code class="register">rdx</code>, <code
+                            class="register">rsp</code>,
+                        <code class="register">rbp</code>, <code class="register">rsi</code>, <code
+                                class="register">rdi</code>, <code class="register">r8</code>-<code
+                                class="register">r15</code></li>
+                    <li><code class="register">xmm0</code>-<code class="register">xmm15</code>,
+                        <code class="register">ymm0</code>-<code class="register">zmm15</code>, <code class="register">zmm...</code>
+                    </li>
+                    <li><code class="register">rdi</code>, <code class="register">rsi</code>, <code
+                            class="register">rdx</code>... arguments (SYSV ABI)
+                    </li>
+                    <li><code class="register">rax</code> is return value</li>
+                </ul>
+                <div class="fragment pop">Registers are Globals</div>
+            </section>
+            <section>
+                <h3>Registers</h3>
+                <table class="registers">
+                    <thead>
+                    <tr>
+                        <th colspan="4" style="width: 400px"><span style="float: left">63</span> ... <span
+                                style="float: right">32</span></th>
+                        <th colspan="2" style="width: 200px"><span style="float: left">31</span> ... <span
+                                style="float: right">16</span></th>
+                        <th style="width: 100px"><span style="float: left">15</span> ... <span
+                                style="float: right">8</span></th>
+                        <th style="width: 100px"><span style="float: left">7</span> ... <span
+                                style="float: right">0</span></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td colspan="8" class="register rax">rax</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" class="regnote">(zeroed on write)</td>
+                        <td colspan="4" class="register eax">eax</td>
+                    </tr>
+                    <tr>
+                        <td colspan="6" class="regnote">(preserved on write)</td>
+                        <td colspan="2" class="register ax">ax</td>
+                    </tr>
+                    <tr>
+                        <td colspan="6" class="regnote">(preserved on write)</td>
+                        <td colspan="1" class="register ah">ah</td>
+                        <td colspan="1" class="regnote">(prsvd)</td>
+                    </tr>
+                    <tr>
+                        <td colspan="7" class="regnote">(preserved on write)</td>
+                        <td colspan="1" class="register al">al</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="fragment pop" style="margin-top: 1em;">And so on for <code class="register">rdi</code>,
+                    <code
+                            class="register">rsi</code>,<code class="register">rcx</code>...
+                </div>
+            </section>
+
+            <section>
+                <h3>Operands</h3>
+                <pre><code class="x86asm" data-trim>
+  register                          ; e.g. rax, rbx, ecx...
+  constant                          ; e.g. 1234
+  &lt;size> ptr [register]             ; e.g. DWORD PTR [rax]
+  &lt;size> ptr [register + offset]    ; e.g. BYTE PTR [rcd + rsi]
+  &lt;size> ptr [register + offset + register2 * (1,2,4,8)]
+                </code></pre>
+                <pre><code class="x86asm" data-trim>
+  add eax, dword ptr [rdi + 12 + rsi * 4]
+                                    ; eax += *(int *)(rdi + 12 + rsi * 4)
+                </code></pre>
+            </section>
+            <section>
+                <h3>Summary</h3>
+                <ul>
+                    <li>Registers: <code class="register">rax</code>, <code class="register">rbx</code>, <code
+                            class="register">rcx</code> ...
+                    </li>
+                    <li>Params: <code class="register">rdi</code>, <code class="register">rsi</code>, <code
+                            class="register">rdx</code>, <code class="register">rcx</code> ...
+                    </li>
+                    <li>Result: <code class="register">rax</code></li>
+                    <li><code>op dest, src</code></li>
+                    <li><code>dest</code>, <code>src</code> are registers or memory</li>
+                </ul>
+            </section>
+        </section>
+
+
+        <!------------------------------------------------------->
+        <section data-background-image="images/todo-bg.png" id="back2backstory">
+            <section>
+                <h3>Where were we?</h3>
+                <div class="w55">
+                <pre><code data-trim class="cpp">
+                int sum(const vector&lt;int> &v) {
+                  int result = 0;
+                  for (size_t i = 0; i < v.size(); ++i)
+                    result += v[i];
+                  return result;
+                }</code></pre>
+                </div>
+                <div class="w45">
+                <pre class="fragment"><code data-trim class="cpp">
+                int sum(const vector&lt;int> &v) {
+                  int result = 0;
+                  for (int x : v)
+                    result += x;
+                  return result;
+                }</code></pre>
+                </div>
+                <div class="fragment">Which is better?</div>
+                <img class="fragment" src="images/CE.svg" alt="Compiler Explorer" style="height: 4em;">
+            </section>
+        </section>
+
+
+        <!------------------------------------------------------->
+        <section data-background-image="images/todo-bg.png" id="andNow">
+            <section>
+                <h3>Demo</h3>
+                <pre><code data-trim class="cpp">
+/// g83:-O2 -march=skylake -std=c++2a -Wall -Wextra -pedantic
+// setup
+  #include &lt;numeric>
+  #include &lt;vector>
+  using namespace std;
+
+int sum(const vector&lt;int> &v) {
+  int result = 0;
+  for (size_t i = 0; i < v.size(); ++i)
+    result += v[i];
+  return result;
+}</code></pre>
+                <aside class="notes">
+                    <ul>
+                        <li>Pop out</li>
+                        <li>Show code</li>
+                        <li>Show optimizer off</li>
+                        <li>Show diff</li>
+                    </ul>
+                </aside>
+            </section>
+            <section>
+                <h3>Walkthrough</h3>
+                <pre><code data-trim class="cpp">
+int sum(const vector&lt;int> &v) {
+                </code></pre>
+                <pre><code data-trim data-line-numbers class="x86asm">
+  ; rdi = const vector&lt;int> *
+  mov rdx, QWORD PTR [rdi]   ; rdx = *rdi     &equiv; begin()
+  mov rcx, QWORD PTR [rdi+8] ; rcx = *(rdi+8) &equiv; end()
+                </code></pre>
+                <pre class="fragment"><code data-trim class="cpp">
+template&lt;typename T> struct _Vector_impl {
+  T *_M_start;
+  T *_M_finish;
+  T *_M_end_of_storage;
+};
+                    </code></pre>
+            </section>
+            <section>
+                <img src="images/vector.svg" alt="Some pointer stuff" class="stretch">
+            </section>
+            <section>
+                <div>
+                    <div class="w50"><h5>Traditional</h5></div>
+                    <div class="w50"><h5>Range</h5></div>
+                </div>
+                <div class="w50">
+                    <pre class="smaller"><code data-trim data-line-numbers="|1|2-4|5|6|" class="x86asm">
+sub rcx, rdx ; rcx = end-begin
+mov rax, rcx
+shr rax, 2   ; (end - begin) / 4
+je .L4       ; size == 0? skip
+add rcx, rdx ; rcx = end again
+xor eax, eax ; result = 0
+                    </code></pre>
+                    <pre class="fragment smaller"><code data-trim class="cpp" data-line-numbers="">
+for (...; i < v.size()...)
+//...
+size_t size() const noexcept {
+  return _M_finish - _M_start;
+}
+</code></pre>
+                </div>
+                <div class="w50">
+                    <pre><code data-trim data-line-numbers class="x86asm">
+xor eax, eax ; result = 0
+cmp rdx, rcx ; begin == end?
+je .L4       ; skip if so
+                </code></pre>
+                    <pre class="fragment"><code data-trim class="cpp" data-line-numbers="">
+for (int x : v) ...
+//...
+auto __begin = begin(v);
+auto __end = end(v);
+for (auto __it = __begin;
+     __it != __end;
+     ++it) {
+  int x = *it;
+</code></pre>
+                </div>
+            </section>
+            <section>
+                <h3>Walkthrough</h3>
+                <pre><code data-trim data-line-numbers="|3|4|5,2,6|7" class="x86asm">
+; rcx &equiv; end, rdx = begin, eax = 0
+.L3:
+  add eax, DWORD PTR [rdx]    ; eax += *(int*)rdx
+  add rdx, 4                  ; rdx += sizeof(int)
+  cmp rdx, rcx                ; is rdx == end?
+  jne .L3                     ;   if not, loop
+  ret                         ; we're done
+            </code></pre>
+            </section>
+            <section>
+                <h3>Backstory</h3>
+                <h5>So, which approach is best?</h5>
+            </section>
+        </section>
+
+        <section data-background-image="images/todo-bg.png" id="zomg_compilers">
+            <section>
+                <h3>What else can my compiler do?</h3>
+            </section>
+        </section>
+
+        <!------------------------------------------------------->
+        <section data-background-image="images/todo-bg.png" id="multiplication">
+            <section>
+                <h3>Multiplication</h3>
+                <div class="left-pane">
+                    <pre><code class="cpp ce" data-trim data-line-numbers>
+int mulByY(int x, int y) {
+  return x * y;
+}
+                    </code></pre>
+                </div>
+                <div class="right-pane">
+                    <pre><code class="x86asm" data-trim data-line-numbers>
+mulByY(int, int):
+  mov eax, edi
+  imul eax, esi
+  ret
+                    </code></pre>
+                </div>
+            </section>
+            <section>
+                <h3>Multiplication</h3>
+                <pre style="width: 10em; padding: 1em;">    1101    (13)
+  x <span class="fragment highlight-current-red" data-fragment-index="4">0</span><span
+                        class="fragment highlight-current-red" data-fragment-index="3">1</span><span
+                        class="fragment highlight-current-red" data-fragment-index="2">0</span><span
+                        class="fragment highlight-current-red" data-fragment-index="1">1</span>     (5)
+&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;
+<span class="fragment" data-fragment-index="1">    1101</span>
+<span class="fragment" data-fragment-index="2">   00000</span>
+<span class="fragment" data-fragment-index="3">  110100</span>
++<span class="fragment" data-fragment-index="4">0000000</span>
+<span class="fragment">&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;
+01000001    (65)</span></pre>
+                <div class="fragment">That's a lot of additions!</div>
+                <div class="fragment">Haswell 32-bit multiply - 4 cycles</div>
+                <div class="fragment">(Haswell 32-bit divide - 20-28 cycles)</div>
+            </section>
+            <section>
+                <h3>Multiplication</h3>
+                <pre><code class="cpp">
+int mulByConstant(int x) { return x * 2; }
+                </code></pre>
+            </section>
+            <section>
+                <h3>Multiplication</h3>
+                <pre><code class="cpp">
+int mulBy65599(int a) {
+  return (a << 16) + (a << 6) - a;
+  //         ^          ^
+  //     a * 65536      |
+  //                  a * 64
+  // 65536a + 64a - 1a = 65599a
+}                </code></pre>
+                <aside class="notes">
+                    <pre>-march=i486 -m32</pre>
+                    shows up what you asked
+                </aside>
+            </section>
+        </section>
+
+        <!------------------------------------------------------->
+        <section data-background-image="images/todo-bg.png" id="misc">
+            <section><h3>Counting bits</h3>
+                <pre><code class="cpp" data-trim data-line-numbers>
+/// g83:-O2 -std=c++2a -march=haswell
+int countSetBits(unsigned int a) {
+  int count = 0;
+  while (a) {
+    count++;
+    a &amp;= (a-1);
+  }
+  return count;
+}
+            </code></pre>
+                <aside class="notes">
+                    Explain a &amp;amp; (a - 1)
+                </aside>
+            </section>
+            <section><h3>Multiple ifs</h3>
+                <pre><code class="cpp" data-trim data-line-numbers>
+bool isWhitespace(char c) {
+  return c == ' '
+    || c == '\r'
+    || c == '\n'
+    || c == '\t';
+}
+            </code></pre>
+            </section>
+            <section><h3>Multiple ifs</h3>
+                <pre><code class="x86asm" data-trim data-line-numbers="|2-4|5-9|10-13">
+isWhitespace(char c):
+  xor eax, eax
+  cmp dil, 32       ; if c > 32 return false;
+  ja .L1
+  ;         3                  1  1
+  ;         2     ......       3  09876543210
+  ; rax = 0b100000000000000000010011000000000
+  ; ' ' = 32, '\r' = 13, '\n' = 10, '\t' = 9
+  movabs rax, 4294977024
+  shrx rax, rax, rdi
+  and eax, 1        ; return (rax >> c) & 1;
+.L1:
+  ret            </code></pre>
+            </section>
+            <section><h3>Ternary ops</h3>
+                <pre><code class="cpp" data-trim data-line-numbers>
+int get_mph(bool fast) {
+  return fast ? 10 : 5;
+}
+            </code></pre>
+            </section>
+            <section><h3>Tail recursion</h3>
+                <pre><code class="cpp" data-trim data-line-numbers>
+bool try_thing();
+
+bool do_the_thing(int retries) {
+  if (try_thing())
+    return true;
+  if (retries > 0)
+    return do_the_thing(retries -1);
+  return false;
+}            </code></pre>
+            </section>
+        </section>
+
+
+        <!------------------------------------------------------->
+        <section data-background-image="images/todo-bg.png" id="vectorisation">
+            <section>
+                <h2>Vectorisation</h2>
+                <pre><code data-trim data-line-numbers class="cpp">
+/// g102:-O3 -std=c++20 -march=haswell
+// setup
+  #include &lt;numeric>
+  #include &lt;vector>
+  using namespace std;
+
+int sum(const vector&lt;int> &v) {
+  int result = 0;
+  for (int x : v)
+    result += x;
+  return result;
+}</code></pre>
+            </section>
+            <section>
+                <h2>Vectorization</h2>
+                <pre><code data-line-numbers data-trim class="x86asm">
+.L4:
+vpaddd ymm1, ymm1, YMMWORD PTR [rax]
+add rax, 32
+cmp rax, rcx
+jne .L4
+                </code></pre>
+                <div>
+                    Summing eight 32-bit values!
+                    <a href="https://godbolt.org/z/YM9E75">1.5 cycles per iteration!</a>
+                </div>
+            </section>
+            <section>
+                <h5>vpaddd ymm1, ymm1, YMMWORD PTR [rax]</h5>
+                <table class="registers">
+                    <tbody>
+                    <tr>
+                        <td class="register ymm1">ymm1:7</td>
+                        <td class="register ymm1">ymm1:6</td>
+                        <td class="register ymm1">ymm1:5</td>
+                        <td class="register ymm1">...</td>
+                        <td class="register ymm1">ymm1:1</td>
+                        <td class="register ymm1">ymm1:0</td>
+                    </tr>
+                    <tr>
+                        <td class="op">+=</td>
+                        <td class="op">+=</td>
+                        <td class="op">+=</td>
+                        <td class="op">+=</td>
+                        <td class="op">+=</td>
+                        <td class="op">+=</td>
+                    </tr>
+                    <tr>
+                        <td class="mem">rax[7]</td>
+                        <td class="mem">rax[6]</td>
+                        <td class="mem">rax[5]</td>
+                        <td class="mem">...</td>
+                        <td class="mem">rax[1]</td>
+                        <td class="mem">rax[0]</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </section>
+            <section>
+                <h3>Autovectorisation</h3>
+                <pre><code data-trim data-line-numbers class="cpp">
+/// clang1001:-O3 -march=skylake -std=c++20 -Wall -Wextra -pedantic
+// setup
+  #include &lt;vector>
+  #include &lt;cstdlib>
+  #include &lt;array>
+  using namespace std;
+///hide
+
+inline array&lt;int, 8> vpaddd_instruction(
+  array&lt;int, 8> lhs,
+  const int *rhs) {
+  array&lt;int, 8> res;
+  for (auto i = 0; i < 8; ++i)
+    res[i] = lhs[i] + rhs[i];
+  return res;
+}
+
+int sum(const vector&lt;int> &v) {
+  int res = 0;
+  size_t index = 0;
+
+  if (v.size() >= 8) {
+    ///unhide
+    array&lt;int, 8> sub_totals = {0,0,0,0,0,0,0,0};
+
+    for (; index &lt; v.size(); index += 8)
+      sub_totals = vpaddd_instruction(sub_totals, &v[index]);
+
+    res = sub_totals[0] + sub_totals[1] + sub_totals[2] + sub_totals[3]
+        + sub_totals[4] + sub_totals[5] + sub_totals[6] + sub_totals[7];
+    ///hide
+  }
+
+  for (; index &lt; v.size(); ++index)
+    res += v[index] * v[index];
+
+  return res;
+}
+                </code></pre>
+            </section>
+        </section>
+
+        <section data-background-image="images/todo-bg.png">
+            <section><h2>Conclusion</h2></section>
+            <section>
+                <h3>Conclusion</h3>
+                <ul>
+                    <li>Write code for humans</li>
+                    <li>Let the compiler write the <code>GOTO</code>s</li>
+                    <li>Trust your compiler</li>
+                    <li>...but learn how to verify</li>
+                </ul>
+            </section>
+        </section>
+        <section data-background-image="images/todo-bg.png">
+            <section>
+                <h3>Thanks!</h3>
+                <div>matt@godbolt.org</div>
+                <div><a href="https://twitter.com/mattgodbolt">@mattgodbolt</a></div>
+                <div><a href="http://godbolt.org/">godbolt.org</a></div>
+            </section>
+        </section>
+    </div>
+    <div class="footer copy">
+        &copy; <a href="https://twitter.com/mattgodbolt">Matt Godbolt</a> 2020
+    </div>
+</div>
+
+<script src="reveal.js/dist/reveal.js"></script>
+<script src="reveal.js/plugin/notes/notes.js"></script>
+<script src="reveal.js/plugin/markdown/markdown.js"></script>
+<script src="reveal.js/plugin/highlight/highlight.js"></script>
+<script src="compiler-explorer.js"></script>
+<script>
+    const ratio = 16 / 9;
+    const width = 1500;
+    Reveal.initialize({
+        history: true,
+        transition: 'fade',
+        slideNumber: true,
+        width: width,
+        height: width / ratio,
+        plugins: [CompilerExplorer, RevealMarkdown, RevealHighlight, RevealNotes]
+    });
+</script>
+</body>
+</html>
