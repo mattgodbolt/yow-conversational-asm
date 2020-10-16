@@ -214,7 +214,6 @@
                     <img src="images/google.png" alt="Google">
                     <img src="images/finance.png" alt="Finance">
                 </div>
-                <div class="fragment pop">TL;DR : low-level hacking</div>
                 <aside class="notes">
                     * Grew up hacking on 8-bit computers
                     * Worked at Argonaut Games 1996 til its demise
@@ -430,6 +429,9 @@ vpaddd ymm1, ymm2, ymm0       ; "ymm1" = "ymm2" + "ymm0"
                 <pre><code class="x86asm" data-trim>
   add eax, dword ptr [rdi + 12 + rsi * 4]
                                     ; eax += *(int *)(rdi + 12 + rsi * 4)
+                </code></pre>
+                <pre class="fragment"><code class="x86asm" data-trim>
+  lea eax, [rdi + 12 + rsi * 4]     ; eax =          (rdi + 12 + rsi * 4)
                 </code></pre>
             </section>
             <section>
@@ -692,25 +694,6 @@ isWhitespace(char c):
   and eax, 1        ; return (rax >> c) & 1;
 .L1:
   ret            </code></pre>
-            </section>
-            <section><h3>Ternary ops</h3>
-                <pre><code class="cpp" data-trim data-line-numbers>
-int get_mph(bool fast) {
-  return fast ? 10 : 5;
-}
-            </code></pre>
-            </section>
-            <section><h3>Tail recursion</h3>
-                <pre><code class="cpp" data-trim data-line-numbers>
-bool try_thing();
-
-bool do_the_thing(int retries) {
-  if (try_thing())
-    return true;
-  if (retries > 0)
-    return do_the_thing(retries -1);
-  return false;
-}            </code></pre>
             </section>
         </section>
 
