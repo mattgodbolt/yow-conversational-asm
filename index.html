@@ -176,9 +176,9 @@
     <div class="slides">
         <section data-background-image="images/todo-bg.png">
             <section>
-                <h2>Conversational ASM</h2>
+                <h2>Conversational<br/>Assembly</h2>
                 <h3>Matt Godbolt <a href="https://twitter.com/mattgodbolt"><br>@mattgodbolt</a></h3>
-                <h5>YOW Tool Time<br>20th October 2020</h5>
+                <h5>YOW Tool Time<br>21st October 2020</h5>
                 <!--<div>To navigate, use the space bar, or the arrow keys (both left/right and up/down).<br>
                     To open Compiler Explorer on any of the examples, control-click on the source-code.
                 </div>-->
@@ -187,23 +187,7 @@
                 <h2>Hello!</h2>
             </section>
             <section>
-                <h2>Confessions</h2>
-                <aside class="notes">
-                    I've been a bad programmer, I've revelled in the complexity and inpenetrability of my code. but in
-                    today's world it's not always required. cpus and compilers have come along a long way since the 80s
-                    and 90s but sometimes there's still bad advice given based off experiences in that era. I hope to
-                    rectify that in this talk.
-                </aside>
-            </section>
-            <section>
                 <img src="images/matt-is-cool.png" alt="Matt is cool" class="stretch">
-            </section>
-            <section>
-                <pre><code data-trim>
-                10 PRINT "What is your name? ";
-                20 INPUT A$
-                30 PRINT "Hello "; A$
-                40 GOTO 10</code></pre>
             </section>
             <section>
                 <h3>Journey</h3>
@@ -285,7 +269,7 @@
         <!------------------------------------------------------->
         <section data-background-image="images/todo-bg.png" id="asm101">
             <section>
-                <h3>64-bit x86 Intro</h3>
+                <h3>Conversational x86</h3>
                 <div class="fragment">
                     <img src="images/One_Ring_inscription.svg" alt="Ash nash krimpatur...">
                     <div class="attribution">
@@ -427,6 +411,10 @@ vpaddd ymm1, ymm2, ymm0       ; "ymm1" = "ymm2" + "ymm0"
   &lt;size> ptr [register + offset + register2 * (1,2,4,8)]
                 </code></pre>
                 <pre><code class="x86asm" data-trim>
+  mov eax, dword ptr [rdi + 12 + rsi * 4]
+                                    ; eax = *(int *)(rdi + 12 + rsi * 4)
+                </code></pre>
+                <pre class="fragment"><code class="x86asm" data-trim>
   add eax, dword ptr [rdi + 12 + rsi * 4]
                                     ; eax += *(int *)(rdi + 12 + rsi * 4)
                 </code></pre>
@@ -579,14 +567,13 @@ for (auto __it = __begin;
             </code></pre>
             </section>
             <section>
-                <h3>Backstory</h3>
                 <h5>So, which approach is best?</h5>
             </section>
         </section>
 
         <section data-background-image="images/todo-bg.png" id="zomg_compilers">
             <section>
-                <h3>What else can my compiler do?</h3>
+                <h3>More examples</h3>
             </section>
         </section>
 
@@ -603,9 +590,9 @@ int mulByY(int x, int y) {
                 </div>
                 <div class="right-pane">
                     <pre><code class="x86asm" data-trim data-line-numbers>
-mulByY(int, int):
-  mov eax, edi
-  imul eax, esi
+mulByY(int, int):       ; multiply edi with esi, and put result in eax
+  mov eax, edi          ; eax = edi
+  imul eax, esi         ; eax *= esi
   ret
                     </code></pre>
                 </div>
